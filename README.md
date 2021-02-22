@@ -143,5 +143,10 @@ This means the transport map is the most efficient one in the OT sense
 For larger scale experiments reported in the paper, run the following training scripts:
 
 * `train_img.py` for the image modeling experiments
-* `train_tabular.py` for the tabular data density estimation
-* `train_vae.py` for improving variational inference (VAE) using flows
+* `train_tabular.py` for the tabular data density estimation.
+The code is to reproduce the experiments from [MAF](https://arxiv.org/abs/1705.07057), based on the 
+repo https://github.com/gpapamak/maf
+* `train_vae.py` for improving variational inference (VAE) using flows, which we modified from
+[Sylvester Flows](https://arxiv.org/abs/1803.05649) https://github.com/riannevdberg/sylvester-flows
+
+

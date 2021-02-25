@@ -3,7 +3,7 @@
 This is the official repository for the paper 
 
 > "Convex Potential Flows: Universal Probability Distributions with Optimal Transport and Convex Optimization"
-by Chin-Wei Huang, Ricky TQ Chen, Christos Tsirigotis, Aaron Courville. In ICLR 2021. 
+by Chin-Wei Huang, Ricky T. Q. Chen, Christos Tsirigotis, Aaron Courville. In ICLR 2021. 
 [[arXiv](https://arxiv.org/abs/2012.05942)] [[OpenReview](https://openreview.net/forum?id=te7PVH1sPxJ)]
 
 

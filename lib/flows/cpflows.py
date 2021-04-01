@@ -94,7 +94,7 @@ class DeepConvexFlow(torch.nn.Module):
 
         optimizer.step(closure)
 
-        error_new = (self.forward_transform(x)[0] - y).abs().max().item()
+        error_new = (self.forward_transform(x, context=context)[0] - y).abs().max().item()
         # if error_new > math.sqrt(tol):
         #     print('inversion error', error_new, flush=True)
         torch.cuda.empty_cache()

@@ -5,11 +5,8 @@ import torch.nn as nn
 import torch
 from lib.distributions import log_standard_normal
 from lib.flows import cpflows
-from lib.made import MADE
+from lib.made import MADE, CMADE
 from lib.naf import sigmoid_flow
-import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('Agg')
 
 
 _scaling_min = 0.001
@@ -137,7 +134,7 @@ class SequentialFlow(torch.nn.Module):
 
     def forward_transform(self, x, logdet=0, context=None, extra=None):
         for flow in self.flows:
-            if isinstance(flow, cpflows.DeepConvexFlow):
+            if isinstance(flow, cpflows.DeepConvexFlow) or isinstance(flow, NAFDSF):
                 x, logdet = flow.forward_transform(x, logdet,
                                                    context=context,
                                                    extra=extra)
@@ -163,6 +160,9 @@ class SequentialFlow(torch.nn.Module):
 
     def plot_logp(self, b=5, n=100):
         """plotting 2D density"""
+        import matplotlib.pyplot as plt
+        import matplotlib
+        matplotlib.use('Agg')
         x1 = torch.linspace(-b, b, n)
         x2 = torch.linspace(-b, b, n)
         X2, X1 = torch.meshgrid(x1, x2)
@@ -353,14 +353,14 @@ class LinearIAF(nn.Module):
 # noinspection PyUnusedLocal
 class IAF(nn.Module):
 
-    def __init__(self, dim, dimh=16, num_hidden_layers=2, natural_ordering=True):
+    def __init__(self, dim, dimh=16, num_hidden_layers=2, natural_ordering=True, activation=torch.nn.ReLU()):
         super(IAF, self).__init__()
         self.dim = dim
         self.dimh = dimh
         self.num_hidden_layers = num_hidden_layers
         hidden_sizes = [dimh] * num_hidden_layers
         self.made = MADE(dim, hidden_sizes, dim*2, num_masks=1, natural_ordering=natural_ordering,
-                         activation=torch.nn.Identity())
+                         activation=activation)
         self.made.net[-1].weight.data.uniform_(-0.001, 0.001)
         self.made.net[-1].bias[:dim].data.zero_()
         self.made.net[-1].bias[dim:].data.zero_().add_(np.log(np.exp(1) - 1))
@@ -381,24 +381,41 @@ class IAF(nn.Module):
 # noinspection PyUnusedLocal
 class NAFDSF(nn.Module):
 
-    def __init__(self, dim, dimh=16, num_hidden_layers=2, natural_ordering=True, ndim=4):
+    def __init__(self, dim, dimh=16, num_hidden_layers=2, natural_ordering=True, ndim=4, dimc=0,
+                 activation=torch.nn.ReLU()):
         super(NAFDSF, self).__init__()
         self.dim = dim
         self.dimh = dimh
+        self.dimc = dimc
         self.ndim = ndim
         self.num_hidden_layers = num_hidden_layers
         hidden_sizes = [dimh] * num_hidden_layers
-        self.made = MADE(dim, hidden_sizes, dim*ndim*3, num_masks=1, natural_ordering=natural_ordering,
-                         activation=torch.nn.Identity())
-        self.made.net[-1].weight.data.uniform_(-0.001, 0.001)
-        self.made.net[-1].bias.data.zero_()
-        self.made.net[-1].bias[:dim].data.zero_().add_(np.log(np.exp(1) - 1))
+        if dimc == 0:
+            self.made = MADE(dim, hidden_sizes, dim*ndim*3, num_masks=1, natural_ordering=natural_ordering,
+                             activation=activation)
+            self.made.net[-1].weight.data.uniform_(-0.001, 0.001)
+            self.made.net[-1].bias.data.zero_()
+            self.made.net[-1].bias[:dim].data.zero_().add_(np.log(np.exp(1) - 1))
+        else:
+            # note: there's some flexibility in the design of how to condition on the context
+            self.context_net = nn.Sequential(
+                nn.Linear(dimc, dimh),
+                activation
+            )
+            self.made = CMADE(dim, hidden_sizes, dim*ndim*3, dimc=dimh, num_masks=1, natural_ordering=natural_ordering,
+                              activation=activation)
+            self.made.layers[-1].layer.weight.data.uniform_(-0.001, 0.001)
+            self.made.layers[-1].layer.bias.data.zero_()
+            self.made.layers[-1].layer.bias[:dim].data.zero_().add_(np.log(np.exp(1) - 1))
 
     def forward(self, x):
         return self.forward_transform(x)
 
-    def forward_transform(self, x, logdet=None, **kwargs):
-        params = self.made(x).view(-1, self.ndim*3, self.dim).permute(0, 2, 1)
+    def forward_transform(self, x, logdet=None, context=None, **kwargs):
+        if self.dimc == 0:
+            params = self.made(x).view(-1, self.ndim*3, self.dim).permute(0, 2, 1)
+        else:
+            params = self.made(x, self.context_net(context)).view(-1, self.ndim * 3, self.dim).permute(0, 2, 1)
         y, dlogdet = sigmoid_flow(x, 0, self.ndim, params)
         if logdet is None:
             return y

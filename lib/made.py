@@ -30,7 +30,7 @@ class MaskedLinear(nn.Linear):
 
 # noinspection PyPep8Naming,PyTypeChecker
 class MADE(nn.Module):
-    def __init__(self, nin, hidden_sizes, nout, num_masks=1, natural_ordering=False, activation=nn.ReLU):
+    def __init__(self, nin, hidden_sizes, nout, num_masks=1, natural_ordering=False, activation=nn.ReLU()):
         """
         nin: integer; number of inputs
         hidden sizes: a list of integers; number of units in hidden layers
@@ -101,3 +101,51 @@ class MADE(nn.Module):
 
     def forward(self, x):
         return self.net(x)
+
+
+class ContextWrapper(nn.Module):
+    def __init__(self, layer, dimc, dimy, scaling=True):
+        super().__init__()
+        self.layer = layer
+        self.scaling = scaling
+        self.b = nn.Linear(dimc, dimy)
+        if scaling:
+            self.a_ = nn.Linear(dimc, dimy)
+        self.reset_param()
+
+    def reset_param(self):
+        self.b.weight.data.uniform_(-0.001, 0.001)
+        self.b.bias.data.zero_()
+        self.a_.weight.data.uniform_(-0.001, 0.001)
+        self.a_.bias.data.zero_().add_(np.log(np.exp(1) - 1))
+
+    # noinspection PyPropertyDefinition
+    def a(self, c):
+        return F.softplus(self.a_(c))
+
+    def forward(self, x, c):
+        y = self.layer(x)
+        if self.scaling:
+            y *= self.a(c)
+        y += self.b(c)
+        return y
+
+
+class CMADE(nn.Module):
+    def __init__(self, nin, hidden_sizes, nout, dimc, num_masks=1, natural_ordering=False, activation=nn.ReLU()):
+        super().__init__()
+        made = MADE(nin, hidden_sizes, nout, num_masks, natural_ordering, activation)
+        self.layers = nn.ModuleList()
+        for l in made.net:
+            if isinstance(l, MaskedLinear):
+                self.layers.extend([ContextWrapper(l, dimc, l.mask.size(0), True)])
+            else:
+                self.layers.extend([l])
+
+    def forward(self, x, c):
+        for l in self.layers:
+            if isinstance(l, ContextWrapper):
+                x = l(x, c)
+            else:
+                x = l(x)
+        return x

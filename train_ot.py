@@ -9,11 +9,11 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import torch
-from lib.flows import SequentialFlow, DeepConvexFlow, LinearIAF
-from lib.icnn import ICNN3
-from lib import distributions
+from cpflows.flows import SequentialFlow, DeepConvexFlow, LinearIAF
+from cpflows.icnn import ICNN3
+from cpflows import distributions
 from data.toy_data import Gaussian as ToyData
-from lib.utils import makedirs
+from cpflows.utils import makedirs
 
 
 makedirs('figures/OT')

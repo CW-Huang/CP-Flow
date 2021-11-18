@@ -2,7 +2,7 @@ from sklearn.datasets import make_swiss_roll
 import torch
 import numpy as np
 from torch.utils.data import Dataset as Dataset
-from lib.distributions import log_normal
+from cpflows.distributions import log_normal
 from scipy.stats import wishart
 from sklearn.utils import shuffle as util_shuffle
 

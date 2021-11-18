@@ -3,9 +3,9 @@ import torch
 import gc
 
 from torch.autograd import Variable
-from lib.sylvester.optimization.loss import calculate_loss
-from lib.sylvester.utils.visual_evaluation import plot_reconstructions
-from lib.sylvester.utils.log_likelihood import calculate_likelihood
+from cpflows.sylvester.optimization.loss import calculate_loss
+from cpflows.sylvester.utils.visual_evaluation import plot_reconstructions
+from cpflows.sylvester.utils.log_likelihood import calculate_likelihood
 
 import numpy as np
 

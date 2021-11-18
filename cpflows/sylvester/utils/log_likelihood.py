@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 from scipy.special import logsumexp
-from lib.sylvester.optimization.loss import calculate_loss_array
+from cpflows.sylvester.optimization.loss import calculate_loss_array
 
 
 def calculate_likelihood(X, model, args, S=5000, MB=500):

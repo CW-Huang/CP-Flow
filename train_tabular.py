@@ -14,11 +14,11 @@ import numpy
 import torch
 from tqdm import tqdm
 
-import lib.datasets as datasets
-import lib.utils as utils
-import lib.flows as flows
-from lib.flows import (SequentialFlow, DeepConvexFlow, ActNorm)
-from lib.icnn import (ICNN, ICNN2, ICNN3, ResICNN2, DenseICNN2)
+import cpflows.datasets as datasets
+import cpflows.utils as utils
+import cpflows.flows as flows
+from cpflows.flows import (SequentialFlow, DeepConvexFlow, ActNorm)
+from cpflows.icnn import (ICNN, ICNN2, ICNN3, ResICNN2, DenseICNN2)
 
 
 ################################################################################

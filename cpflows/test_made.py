@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from lib.made import MADE
+from cpflows.made import MADE
 
 # run a quick and dirty test for the autoregressive property
 D = 10

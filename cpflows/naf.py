@@ -1,6 +1,6 @@
 # noinspection PyPep8Naming
 from torch.nn import functional as F
-from lib.functional import *
+from cpflows.functional import *
 
 
 def sigmoid_flow(x, logdet=0, ndim=4, params=None, delta=DELTA, logit_end=True):

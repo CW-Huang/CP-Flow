@@ -3,10 +3,10 @@ import numpy as np
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-from lib.distributions import log_standard_normal
-from lib.flows import cpflows
-from lib.made import MADE, CMADE
-from lib.naf import sigmoid_flow
+from cpflows.distributions import log_standard_normal
+from cpflows.flows import cpflows
+from cpflows.made import MADE, CMADE
+from cpflows.naf import sigmoid_flow
 
 
 _scaling_min = 0.001

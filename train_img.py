@@ -21,11 +21,11 @@ import torchvision.transforms as transforms
 from torchvision.utils import save_image
 import torchvision.datasets as vdsets
 
-import lib.datasets as datasets
-import lib.flows as flows
-import lib.utils as utils
-from lib.multiscale_flow import MultiscaleFlow
-from lib.icnn import ICNN2, ConvICNN, ConvICNN2, ConvICNN3
+import cpflows.datasets as datasets
+import cpflows.flows as flows
+import cpflows.utils as utils
+from cpflows.multiscale_flow import MultiscaleFlow
+from cpflows.icnn import ICNN2, ConvICNN, ConvICNN2, ConvICNN3
 
 torch.backends.cudnn.benchmark = True
 
